@@ -88,6 +88,8 @@ h1{font-family:var(--hand); font-weight:400; font-size:48px; line-height:1.05; m
 .sentence{display:block; font-family:var(--en); font-size:19px; font-weight:500; margin-top:8px; line-height:1.55}
 .blank{display:inline-block; min-width:72px; border-bottom:2px solid var(--ink); margin-inline:2px; transform:translateY(-4px)}
 .en{font-family:var(--en); font-weight:500}
+.ref{display:inline-block; font-size:13px; color:var(--muted); border:1px solid var(--line); border-radius:6px; padding:0 8px; margin-left:4px; vertical-align:middle}
+.sol .ko{display:block; margin-top:6px; color:var(--muted)}
 .say{
   display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
   font:inherit; font-size:14px; font-weight:500; color:var(--sel); background:var(--sel-soft);
@@ -97,6 +99,15 @@ h1{font-family:var(--hand); font-weight:400; font-size:48px; line-height:1.05; m
 .say svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 .say.playing{background:var(--sel); color:var(--card)}
 .row .say{margin-right:auto; align-self:center}
+.choices li{display:flex; gap:8px}
+.choices li .choice{flex:1; min-width:0}
+.say-mini{
+  flex:none; width:48px; display:grid; place-items:center; cursor:pointer;
+  border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--sel);
+}
+.say-mini:hover{border-color:var(--sel); background:var(--sel-soft)}
+.say-mini svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.say-mini.playing{background:var(--sel); color:var(--card); border-color:var(--sel)}
 
 .mark{position:absolute; inset:-6px; width:calc(100% + 12px); height:calc(100% + 12px); pointer-events:none; overflow:visible}
 .mark path{fill:none; stroke:var(--pen); stroke-width:4; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; animation:draw .45s ease-out forwards}
@@ -143,7 +154,7 @@ footer{font-size:13px; color:var(--muted); text-align:center}
 
 <div class="wrap">
   <header>
-    <span class="eyebrow">고등 영어 · 수능 대비 단어 · 숙어 · 어법</span>
+    <span class="eyebrow">고등 영어 · 수능 대비 단어 · 숙어 · 어법 · 성경</span>
     <h1>이레 영어</h1>
     <p class="lead">매일 새 10문제가 나와요. 바로 채점하고, 틀린 문제는 오답노트에 모입니다.</p>
   </header>
@@ -152,7 +163,7 @@ footer{font-size:13px; color:var(--muted); text-align:center}
   <section class="day" id="day" aria-live="polite"></section>
   <div class="dots" id="dots" aria-hidden="true"></div>
   <main id="stage"></main>
-  <footer>숫자 키 1~5로 보기 선택, Enter로 다음 문제 · 오늘의 문제는 한국 시간 자정에 바뀝니다</footer>
+  <footer>숫자 키 1~5로 보기 선택, Enter로 다음 문제 · 오늘의 문제는 한국 시간 자정에 바뀝니다<br>성경 본문: World English Bible (퍼블릭 도메인)</footer>
 </div>
 
 <script>
@@ -460,13 +471,142 @@ const GRAMMAR = [
   { s:`I have ___ finished my homework.`, c:['already','yet','still','ever','since'], a:0, e:`긍정문 현재완료에서 ‘이미’는 already. yet은 부정문·의문문에 써요.` },
   { s:`The news ___ surprising to everyone.`, c:['was','were','are','have been','be'], a:0, e:`news는 -s로 끝나지만 셀 수 없는 명사라 단수 취급해요.` },
 ];
+
+// ── 성경 ── 본문: World English Bible (WEB, 퍼블릭 도메인)
+// 성경 단어: 단어|품사|뜻
+const BIBLE_WORD_TEXT = `
+covenant|n|언약
+grace|n|은혜
+mercy|n|긍휼
+righteousness|n|의(義)
+salvation|n|구원
+faith|n|믿음
+hope|n|소망
+sin|n|죄
+sacrifice|n|제물
+altar|n|제단
+temple|n|성전
+tabernacle|n|성막
+prophet|n|선지자
+disciple|n|제자
+apostle|n|사도
+parable|n|비유
+resurrection|n|부활
+commandment|n|계명
+wilderness|n|광야
+shepherd|n|목자
+flock|n|양 떼
+harvest|n|추수
+famine|n|기근
+glory|n|영광
+kingdom|n|나라
+blessing|n|복
+miracle|n|기적
+multitude|n|무리
+tribe|n|지파
+priest|n|제사장
+gospel|n|복음
+angel|n|천사
+servant|n|종
+repent|v|회개하다
+forgive|v|용서하다
+redeem|v|속량하다
+worship|v|예배하다
+praise|v|찬양하다
+pray|v|기도하다
+obey|v|순종하다
+baptize|v|세례를 주다
+proclaim|v|선포하다
+rejoice|v|기뻐하다
+persecute|v|박해하다
+heal|v|고치다
+tempt|v|유혹하다
+holy|a|거룩한
+humble|a|겸손한
+faithful|a|신실한
+righteous|a|의로운
+eternal|a|영원한
+merciful|a|자비로운
+wicked|a|악한
+blessed|a|복 있는
+almighty|a|전능한
+`;
+
+// 성경에서 온 영어 표현: 표현|뜻|출처
+const BIBLE_EXPR_TEXT = `
+the salt of the earth|믿음직하고 훌륭한 사람|마태복음 5:13
+a good Samaritan|어려운 사람을 돕는 친절한 사람|누가복음 10장
+go the extra mile|기대 이상으로 애쓰다|마태복음 5:41
+turn the other cheek|보복하지 않고 참다|마태복음 5:39
+the writing on the wall|불길한 징조|다니엘 5장
+a drop in the bucket|아주 적은 양|이사야 40:15
+by the skin of one's teeth|간신히|욥기 19:20
+the blind leading the blind|모르는 사람이 모르는 사람을 이끄는 상황|마태복음 15:14
+a wolf in sheep's clothing|양의 탈을 쓴 위선자|마태복음 7:15
+the powers that be|권력을 쥔 사람들|로마서 13:1
+fall from grace|신임을 잃다|갈라디아서 5:4
+a labor of love|좋아서 하는 수고|데살로니가전서 1:3
+see eye to eye|의견이 일치하다|이사야 52:8
+the apple of one's eye|매우 소중한 사람|신명기 32:10
+cast the first stone|앞장서서 남을 비난하다|요한복음 8:7
+wash one's hands of|~에서 손을 떼다|마태복음 27:24
+the prodigal son|뉘우치고 돌아온 사람|누가복음 15장
+a house divided|분열된 집단|마가복음 3:25
+reap what you sow|뿌린 대로 거두다|갈라디아서 6:7
+put your house in order|신변을 정리하다|이사야 38:1
+a thorn in the flesh|계속 괴롭히는 골칫거리|고린도후서 12:7
+the eleventh hour|마지막 순간|마태복음 20:6
+nothing new under the sun|세상에 새로운 것은 없다|전도서 1:9
+a land of milk and honey|풍요로운 땅|출애굽기 3:8
+fight the good fight|옳은 일을 위해 끝까지 애쓰다|디모데전서 6:12
+feet of clay|겉보기와 달리 숨겨진 약점|다니엘 2장
+the straight and narrow|바르고 정직한 삶|마태복음 7:14
+my brother's keeper|남을 돌볼 책임이 있는 사람|창세기 4:9
+a leopard can't change its spots|타고난 본성은 바뀌지 않는다|예레미야 13:23
+`;
+
+// 구절 빈칸: r 출처, s 구절(빈칸은 ___), a 정답, d 오답 4개, ko 뜻(풀어 쓴 말), e 문법 포인트(있으면)
+const VERSES = [
+  { r:'창세기 1:1', s:`In the beginning, God ___ the heavens and the earth.`, a:'created', d:['saw','filled','left','named'], ko:'태초에 하나님이 하늘과 땅을 창조하셨다.' },
+  { r:'창세기 22:14', s:`Abraham called the name of that place "Yahweh Will ___".`, a:'Provide', d:['Rest','Return','Remember','Rule'], ko:'아브라함이 그곳을 ‘여호와 이레(여호와께서 준비하신다)’라고 불렀다.', e:'‘이레’는 ‘준비하시다, 마련하시다’라는 뜻이에요.' },
+  { r:'시편 23:1', s:`Yahweh is my ___: I shall lack nothing.`, a:'shepherd', d:['king','father','friend','teacher'], ko:'여호와는 나의 목자이시니 내게 부족함이 없다.' },
+  { r:'시편 46:1', s:`God is our refuge and ___, a very present help in trouble.`, a:'strength', d:['wisdom','light','glory','peace'], ko:'하나님은 우리의 피난처이자 힘이시며, 어려울 때 곁에 계신 도움이시다.' },
+  { r:'시편 119:105', s:`Your word is a ___ to my feet, and a light for my path.`, a:'lamp', d:['road','rock','song','gift'], ko:'주의 말씀은 내 발을 비추는 등불이요 내 길을 밝히는 빛이다.' },
+  { r:'잠언 3:5', s:`Trust in Yahweh with all your heart, and don't ___ on your own understanding.`, a:'lean', d:['stand','build','wait','count'], ko:'마음을 다해 여호와를 신뢰하고 네 지혜에 기대지 마라.' },
+  { r:'전도서 3:1', s:`For everything there is a ___, and a time for every purpose under heaven.`, a:'season', d:['reason','place','price','story'], ko:'모든 일에는 때가 있고, 하늘 아래 모든 일에는 알맞은 시기가 있다.' },
+  { r:'이사야 40:31', s:`But those who wait for Yahweh will renew their strength. They will mount up with wings like ___.`, a:'eagles', d:['doves','angels','clouds','arrows'], ko:'여호와를 기다리는 사람은 새 힘을 얻어 독수리처럼 날개 치며 올라갈 것이다.' },
+  { r:'예레미야 29:11', s:`"For I know the thoughts that I think toward you," says Yahweh, "thoughts of peace, and not of evil, to give you hope and a ___."`, a:'future', d:['reward','kingdom','home','name'], ko:'내가 너희를 향한 생각을 안다. 재앙이 아니라 평안을 주려는 생각이며, 너희에게 소망과 미래를 주려는 것이다.' },
+  { r:'미가 6:8', s:`What does Yahweh require of you, but to act justly, to love mercy, and to walk ___ with your God?`, a:'humbly', d:['quietly','safely','boldly','daily'], ko:'여호와께서 구하시는 것은 정의롭게 행하고, 긍휼을 사랑하며, 겸손히 하나님과 함께 걷는 것이다.', e:'동사 walk를 꾸미므로 부사 humbly예요.' },
+  { r:'마태복음 5:13', s:`You are the ___ of the earth.`, a:'salt', d:['gold','heart','hope','rock'], ko:'너희는 세상의 소금이다.' },
+  { r:'마태복음 5:14', s:`You are the light of the world. A city located on a ___ can't be hidden.`, a:'hill', d:['river','rock','road','cloud'], ko:'너희는 세상의 빛이다. 산 위에 있는 도시는 숨겨질 수 없다.' },
+  { r:'마태복음 7:7', s:`Ask, and it will be given you. Seek, and you will ___.`, a:'find', d:['see','know','live','win'], ko:'구하라, 그러면 받을 것이다. 찾으라, 그러면 찾을 것이다.' },
+  { r:'마태복음 11:28', s:`Come to me, all you who labor and are heavily burdened, and I will give you ___.`, a:'rest', d:['bread','gold','work','power'], ko:'수고하고 무거운 짐을 진 사람은 모두 내게 오라. 내가 너희를 쉬게 하겠다.' },
+  { r:'마태복음 22:39', s:`You shall love your ___ as yourself.`, a:'neighbor', d:['brother','teacher','father','friend'], ko:'네 이웃을 네 몸처럼 사랑하라.' },
+  { r:'요한복음 3:16', s:`For God so ___ the world, that he gave his one and only Son, that whoever believes in him should not perish, but have eternal life.`, a:'loved', d:['saw','made','judged','left'], ko:'하나님이 세상을 이처럼 사랑하셔서 하나뿐인 아들을 주셨다. 그를 믿는 사람은 누구든 멸망하지 않고 영원한 생명을 얻는다.' },
+  { r:'요한복음 14:6', s:`I am the way, the ___, and the life.`, a:'truth', d:['light','door','word','hope'], ko:'나는 길이요, 진리요, 생명이다.' },
+  { r:'로마서 8:28', s:`We know that all things work ___ for good for those who love God.`, a:'together', d:['hard','alone','slowly','again'], ko:'하나님을 사랑하는 사람에게는 모든 것이 함께 작용하여 선을 이룬다는 것을 우리는 안다.' },
+  { r:'로마서 12:12', s:`rejoicing in hope; enduring in troubles; continuing steadfastly in ___;`, a:'prayer', d:['praise','peace','faith','love'], ko:'소망 가운데 기뻐하고, 어려움 속에서 참으며, 기도에 힘쓰라.' },
+  { r:'고린도전서 13:4', s:`Love is ___ and is kind.`, a:'patient', d:['strong','perfect','pure','wise'], ko:'사랑은 오래 참고 친절하다.' },
+  { r:'고린도전서 13:13', s:`But now faith, hope, and love remain—these three. The ___ of these is love.`, a:'greatest', d:['greater','great','first','last'], ko:'믿음, 소망, 사랑, 이 세 가지는 항상 있을 것인데, 그중 가장 큰 것은 사랑이다.', e:'셋 중에서 ‘가장’이므로 the + 최상급 greatest예요.' },
+  { r:'갈라디아서 5:22', s:`But the fruit of the Spirit is love, joy, ___, patience, kindness, goodness, faith, gentleness, and self-control.`, a:'peace', d:['hope','power','wisdom','glory'], ko:'성령의 열매는 사랑, 기쁨, 평화, 인내, 친절, 선함, 신실함, 온유, 절제다.' },
+  { r:'에베소서 2:8', s:`For by ___ you have been saved through faith.`, a:'grace', d:['works','law','power','wisdom'], ko:'너희는 믿음으로 말미암아 은혜로 구원을 받았다.' },
+  { r:'빌립보서 4:13', s:`I can do all things through Christ, who ___ me.`, a:'strengthens', d:['strengthen','strengthening','to strengthen','strength'], ko:'나에게 힘을 주시는 그리스도 안에서 나는 모든 것을 할 수 있다.', e:'관계대명사 who의 선행사 Christ가 3인칭 단수라서 strengthens예요.' },
+  { r:'데살로니가전서 5:16-18', s:`Always rejoice. Pray without ___. In everything give thanks.`, a:'ceasing', d:['cease','ceased','to cease','ceases'], ko:'항상 기뻐하라. 쉬지 말고 기도하라. 모든 일에 감사하라.', e:'전치사 without 뒤에는 동명사 ceasing이 와요.' },
+  { r:'히브리서 11:1', s:`Now faith is assurance of things hoped for, proof of things not ___.`, a:'seen', d:['see','saw','seeing','sees'], ko:'믿음은 바라는 것들에 대한 확신이며, 보이지 않는 것들에 대한 증거다.', e:'things가 ‘보여지지 않는’ 것이므로 과거분사 seen이에요.' },
+  { r:'여호수아 1:9', s:`Be strong and ___. Don't be afraid.`, a:'courageous', d:['courage','courageously','encourage','encouraged'], ko:'강하고 담대하라. 두려워하지 마라.', e:'Be 뒤에는 형용사가 오므로 strong과 짝을 이루는 courageous예요.' },
+  { r:'요한일서 4:8', s:`He who doesn't love doesn't know God, for God is ___.`, a:'love', d:['good','great','life','holy'], ko:'사랑하지 않는 사람은 하나님을 알지 못한다. 하나님은 사랑이시기 때문이다.' },
+];
 // ─────────────────────────────────────────────────────────
 
 const POS = { v: 'v.', a: 'adj.', n: 'n.', ad: 'adv.' };
 const POS_KO = { v: '동사', a: '형용사', n: '명사', ad: '부사' };
 const VOCAB = VOCAB_TEXT.trim().split('\n').map(l => { const [w, p, m] = l.split('|'); return { w, p, m }; });
 const IDIOMS = IDIOM_TEXT.trim().split('\n').map(l => { const [w, m] = l.split('|'); return { w, m }; });
-const PER_DAY = { vocab: 6, idiom: 2, grammar: 2 };
+const BIBLE_WORDS = BIBLE_WORD_TEXT.trim().split('\n').map(l => { const [w, p, m] = l.split('|'); return { w, p, m }; });
+const BIBLE_EXPRS = BIBLE_EXPR_TEXT.trim().split('\n').map(l => { const [w, m, r] = l.split('|'); return { w, m, r }; });
+const BIBLE_TOTAL = BIBLE_WORDS.length + BIBLE_EXPRS.length + VERSES.length;
+// 오늘의 10문제: 단어 4(뜻 고르기 3 + 단어 고르기 1) · 숙어 2 · 어법 2 · 성경 2(구절 1 + 성경 단어/표현 1)
+const PER_DAY = { vocab: 4, idiom: 2, grammar: 2 };
 const EPOCH = '2026-01-01';
 
 const LABELS = ['①','②','③','④','⑤'];
@@ -524,6 +664,7 @@ function vocabQ(i, dir, rand) {
       sol: `<span class="en">${esc(it.w)}</span> (${POS_KO[it.p]}) ${esc(it.m)}` };
   }
   return { src: `v${i}`, cat: '단어', kind: '단어 고르기', ans, sayAfter: it.w, sayLabel: '정답 발음 듣기',
+    sayChoices: opts.map(o => o.w),
     q: `다음 뜻을 가진 단어는?<span class="kor">${esc(it.m)}</span>`,
     choices: opts.map(o => `<span class="en">${esc(o.w)}</span>`),
     sol: opts.map(o => `<span class="en">${esc(o.w)}</span> ${esc(o.m)}`).join(' · ') };
@@ -543,11 +684,47 @@ function grammarQ(i, rand) {
   const sentence = esc(g.s).replace('___', '<span class="blank"></span>');
   return { src: `g${i}`, cat: '어법', kind: '빈칸 채우기', ans: order.indexOf(g.a),
     sayAfter: g.s.replace('___', g.c.at(g.a)), sayLabel: '완성 문장 듣기',
+    sayChoices: order.map(k => g.c.at(k)),
     q: `빈칸에 들어갈 말로 알맞은 것은?<span class="sentence">${sentence}</span>`,
     choices: order.map(k => `<span class="en">${esc(g.c.at(k))}</span>`),
     sol: `정답 <span class="en">${esc(g.c.at(g.a))}</span>. ${esc(g.e)}` };
 }
+function bibleWordQ(i, rand) {
+  const it = BIBLE_WORDS.at(i);
+  const same = shuffle(BIBLE_WORDS.filter((v, j) => j !== i && v.p === it.p && v.m !== it.m), rand);
+  const rest = shuffle(BIBLE_WORDS.filter(v => v.p !== it.p), rand);
+  const opts = shuffle([it, ...[...same, ...rest].slice(0, 4)], rand);
+  return { src: `bw${i}`, cat: '성경', kind: '성경 단어', ans: opts.indexOf(it), say: it.w,
+    q: `다음 단어의 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}<span class="pos">${POS[it.p]}</span></span>`,
+    choices: opts.map(o => esc(o.m)),
+    sol: `<span class="en">${esc(it.w)}</span> (${POS_KO[it.p]}) ${esc(it.m)}` };
+}
+function bibleExprQ(i, rand) {
+  const it = BIBLE_EXPRS.at(i);
+  const opts = shuffle([it, ...shuffle(BIBLE_EXPRS.filter((v, j) => j !== i), rand).slice(0, 4)], rand);
+  return { src: `be${i}`, cat: '성경', kind: '성경에서 온 표현', ans: opts.indexOf(it), say: it.w,
+    q: `성경에서 온 영어 표현입니다. 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}</span>`,
+    choices: opts.map(o => esc(o.m)),
+    sol: `<span class="en">${esc(it.w)}</span> ${esc(it.m)} · 출처: ${esc(it.r)}` };
+}
+function verseQ(i, rand) {
+  const v = VERSES.at(i);
+  const opts = shuffle([v.a, ...v.d], rand);
+  const sentence = esc(v.s).replace('___', '<span class="blank"></span>');
+  return { src: `bv${i}`, cat: '성경', kind: '구절 빈칸', ans: opts.indexOf(v.a),
+    sayAfter: v.s.replace('___', v.a), sayLabel: '구절 듣기', sayChoices: opts,
+    q: `빈칸에 들어갈 말로 알맞은 것은? <span class="ref">${esc(v.r)}</span><span class="sentence">${sentence}</span>`,
+    choices: opts.map(o => `<span class="en">${esc(o)}</span>`),
+    sol: `정답 <span class="en">${esc(v.a)}</span>. ${v.e ? esc(v.e) + ' ' : ''}<span class="ko">뜻: ${esc(v.ko)} (${esc(v.r)})</span>` };
+}
+function bibleDeckSrcs() {
+  return [...BIBLE_WORDS.keys()].map(i => `bw${i}`)
+    .concat([...BIBLE_EXPRS.keys()].map(i => `be${i}`), [...VERSES.keys()].map(i => `bv${i}`));
+}
 function fromSrc(src, rand) {
+  if (src.startsWith('bw')) return bibleWordQ(Number(src.slice(2)), rand);
+  if (src.startsWith('be')) return bibleExprQ(Number(src.slice(2)), rand);
+  if (src.startsWith('bv')) return verseQ(Number(src.slice(2)), rand);
   const i = Number(src.slice(1));
   if (src[0] === 'v') return vocabQ(i, rand() < 0.5 ? 'wm' : 'mw', rand);
   if (src[0] === 'i') return idiomQ(i, rand);
@@ -558,16 +735,20 @@ function dailyDeck(date) {
   const d = dayIndex(date);
   const rand = rng(`day-${date}`);
   const v = pickCycle('vocab', VOCAB.length, d, PER_DAY.vocab);
+  const b = pickCycle('bible', BIBLE_WORDS.length + BIBLE_EXPRS.length, d, 1).at(0);
   const qs = [
-    ...v.slice(0, 4).map(i => vocabQ(i, 'wm', rand)),
-    ...v.slice(4).map(i => vocabQ(i, 'mw', rand)),
+    ...v.slice(0, 3).map(i => vocabQ(i, 'wm', rand)),
+    ...v.slice(3).map(i => vocabQ(i, 'mw', rand)),
     ...pickCycle('idiom', IDIOMS.length, d, PER_DAY.idiom).map(i => idiomQ(i, rand)),
     ...pickCycle('grammar', GRAMMAR.length, d, PER_DAY.grammar).map(i => grammarQ(i, rand)),
+    b < BIBLE_WORDS.length ? bibleWordQ(b, rand) : bibleExprQ(b - BIBLE_WORDS.length, rand),
+    verseQ(pickCycle('verse', VERSES.length, d, 1).at(0), rand),
   ];
   return qs;
 }
 function practiceDeck(cat) {
   const rand = Math.random;
+  if (cat === '성경') return shuffle(bibleDeckSrcs(), rand).slice(0, 10).map(s => fromSrc(s, rand));
   if (cat === '단어') return shuffle([...VOCAB.keys()], rand).slice(0, 10).map(i => vocabQ(i, rand() < 0.5 ? 'wm' : 'mw', rand));
   if (cat === '숙어') return shuffle([...IDIOMS.keys()], rand).slice(0, 10).map(i => idiomQ(i, rand));
   if (cat === '어법') return shuffle([...GRAMMAR.keys()], rand).slice(0, 10).map(i => grammarQ(i, rand));
@@ -611,7 +792,7 @@ function speak(text, btn) {
     u.rate = 0.9;
     const v = englishVoice();
     if (v) u.voice = v;
-    document.querySelectorAll('.say.playing').forEach(b => b.classList.remove('playing'));
+    document.querySelectorAll('.playing').forEach(b => b.classList.remove('playing'));
     btn?.classList.add('playing');
     u.onend = u.onerror = () => btn?.classList.remove('playing');
     synth.speak(u);
@@ -627,7 +808,7 @@ function mark(kind, small) {
 }
 
 function renderChips() {
-  const counts = { '오늘의 퀴즈': 10, '단어': VOCAB.length, '숙어': IDIOMS.length, '어법': GRAMMAR.length, '오답노트': loadSet(STORE_WRONG).size };
+  const counts = { '오늘의 퀴즈': 10, '단어': VOCAB.length, '숙어': IDIOMS.length, '어법': GRAMMAR.length, '성경': BIBLE_TOTAL, '오답노트': loadSet(STORE_WRONG).size };
   $('#chips').innerHTML = Object.entries(counts).map(([k, n]) =>
     `<button class="chip" type="button" data-mode="${k}" aria-pressed="${k === mode}">${k}<span class="n">${n}</span></button>`).join('');
 }
@@ -642,16 +823,49 @@ function renderDay() {
       <button class="nav" type="button" data-act="next-day" aria-label="다음날 문제" ${viewDate >= TODAY ? 'disabled' : ''}>▶</button>
       ${done ? `<span class="badge">완료 ${done.right}/${done.total}</span>` : ''}
       ${s ? `<span class="streak">연속 ${s}일</span>` : ''}
-      <p class="sub">${viewDate === TODAY ? '오늘의 10문제: 단어 6 · 숙어 2 · 어법 2' : '지난 날의 문제예요. 놓친 날을 채워 보세요.'}</p>`;
+      <p class="sub">${viewDate === TODAY ? '오늘의 10문제: 단어 4 · 숙어 2 · 어법 2 · 성경 2' : '지난 날의 문제예요. 놓친 날을 채워 보세요.'}</p>`;
   } else {
-    const sub = mode === '오답노트' ? '틀린 문제에서 10문제를 골라요. 다시 맞히면 오답노트에서 빠집니다.' : `${mode} 문제에서 무작위로 10문제를 골라요.`;
+    const sub = mode === '오답노트' ? '틀린 문제에서 10문제를 골라요. 다시 맞히면 오답노트에서 빠집니다.'
+      : mode === '성경' ? '성경 단어, 성경에서 온 영어 표현, 구절 빈칸에서 10문제를 골라요. 본문은 World English Bible입니다.' : `${mode} 문제에서 무작위로 10문제를 골라요. 다 풀면 ‘새 10문제’로 바꿀 수 있어요.`;
     $('#day').innerHTML = `<span class="date">${mode} 연습</span><p class="sub">${sub}</p>`;
   }
 }
 
-function start() {
-  deck = mode === '오늘의 퀴즈' ? dailyDeck(viewDate) : practiceDeck(mode);
-  idx = 0; results = []; retrying = false;
+// ── 탭별 진행 상황 유지 ──
+// 탭을 옮겨도 풀던 곳을 기억하고, 오늘의 퀴즈는 브라우저를 닫았다 열어도 이어서 풀 수 있음
+const STORE_SESSION = 'dongeurami-english-session';
+const memo = {};
+// 문제 구성이 바뀌면(앱 업데이트 등) 예전 진행 기록은 버림
+function deckSig() { return deck.map(q => q.src).join(','); }
+function tabKey() { return mode === '오늘의 퀴즈' ? `day:${viewDate}` : mode; }
+function loadSessions() { try { return JSON.parse(localStorage.getItem(STORE_SESSION) || '{}'); } catch { return {}; } }
+function saveSessions(s) {
+  const keep = addDays(TODAY, -30);
+  for (const d of Object.keys(s)) if (d < keep) delete s[d];
+  try { localStorage.setItem(STORE_SESSION, JSON.stringify(s)); } catch {}
+}
+function stash() {
+  memo[tabKey()] = { deck, idx, results, retrying };
+  if (mode === '오늘의 퀴즈' && !retrying) {
+    const s = loadSessions();
+    s[viewDate] = { idx, results, sig: deckSig() };
+    saveSessions(s);
+  }
+}
+
+function start(fresh = false) {
+  const saved = memo[tabKey()];
+  if (!fresh && saved && saved.deck.length) {
+    ({ deck, idx, results, retrying } = saved);
+  } else if (mode === '오늘의 퀴즈') {
+    deck = dailyDeck(viewDate);
+    const saved2 = fresh ? null : loadSessions()[viewDate];
+    const s = saved2 && saved2.sig === deckSig() ? saved2 : null;
+    idx = s ? s.idx : 0; results = s ? s.results : []; retrying = false;
+  } else {
+    deck = practiceDeck(mode); idx = 0; results = []; retrying = false;
+  }
+  stash();
   renderChips(); renderDay(); render();
 }
 
@@ -683,8 +897,10 @@ function questionHTML(q) {
       else if (i === res.picked) { cls = 'picked-wrong'; m = mark('no', true); }
       else cls = 'dim';
     }
+    const mini = q.sayChoices && CAN_SPEAK
+      ? `<button class="say-mini" type="button" data-say="${esc(q.sayChoices.at(i))}" aria-label="${LABELS.at(i)} 발음 듣기">${SPEAKER}</button>` : '';
     return `<li><button class="choice ${cls}" type="button" data-pick="${i}" ${done ? 'disabled' : ''}>
-      <span class="lab">${LABELS.at(i)}${m}</span><span>${c}</span></button></li>`;
+      <span class="lab">${LABELS.at(i)}${m}</span><span>${c}</span></button>${mini}</li>`;
   }).join('');
   const last = idx === deck.length - 1;
   const feedback = done ? `
@@ -727,6 +943,7 @@ function answer(i) {
   if (!q || results.at(idx)) return;
   const correct = i === q.ans;
   results[idx] = { correct, picked: i };
+  stash();
   const wrong = loadSet(STORE_WRONG);
   correct ? wrong.delete(q.src) : wrong.add(q.src);
   saveSet(STORE_WRONG, wrong);
@@ -741,23 +958,28 @@ function answer(i) {
   $('#next-btn')?.focus({ preventScroll: true });
 }
 
-function next() { if (CAN_SPEAK) window.speechSynthesis.cancel(); idx += 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function next() { if (CAN_SPEAK) window.speechSynthesis.cancel(); idx += 1; stash(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 document.addEventListener('click', e => {
   const say = e.target.closest('[data-say]');
   if (say) { speak(say.dataset.say, say); return; }
   const m = e.target.closest('[data-mode]');
-  if (m) { mode = m.dataset.mode; viewDate = TODAY; start(); return; }
+  if (m) {
+    // 지금 보고 있는 탭을 다시 누르면 아무것도 바꾸지 않음 (지난 날짜를 보다가 '오늘의 퀴즈'를 누르면 오늘로 이동)
+    if (m.dataset.mode === mode && (mode !== '오늘의 퀴즈' || viewDate === TODAY)) return;
+    if (CAN_SPEAK) window.speechSynthesis.cancel();
+    mode = m.dataset.mode; viewDate = TODAY; start(); return;
+  }
   const pick = e.target.closest('[data-pick]');
   if (pick && !pick.disabled) { answer(Number(pick.dataset.pick)); return; }
   const act = e.target.closest('[data-act]')?.dataset.act;
   if (act === 'next') next();
-  if (act === 'restart') start();
+  if (act === 'restart') start(true);
   if (act === 'prev') { viewDate = addDays(viewDate, -1); start(); }
   if (act === 'next-day' && viewDate < TODAY) { viewDate = addDays(viewDate, 1); start(); }
   if (act === 'retry-wrong') {
     const again = deck.filter((_, i) => !results.at(i)?.correct);
-    deck = again; idx = 0; results = []; retrying = true; render();
+    deck = again; idx = 0; results = []; retrying = true; stash(); render();
   }
 });
 
