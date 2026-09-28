@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>동그라미 영어 퀴즈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,500&family=Nanum+Pen+Script&display=swap">
+<style>
+:root{
+  --paper:#F6F8FB; --grid:#E3E9F1; --card:#FFFFFF; --ink:#18212E; --muted:#5A6576;
+  --line:#D6DEE8; --pen:#D2372A; --pen-soft:#FCEAE7; --sel:#2B4C8C; --sel-soft:#E8EDF7;
+  --btn-ink:#FFFFFF;
+  --body:"IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --en:"IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --hand:"Nanum Pen Script", "IBM Plex Sans KR", cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#10151D; --grid:#18202A; --card:#161D27; --ink:#E4EAF2; --muted:#98A4B5;
+    --line:#2A3441; --pen:#FF6B5D; --pen-soft:#3A201D; --sel:#93B2F0; --sel-soft:#1C283C;
+    --btn-ink:#10151D;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#10151D; --grid:#18202A; --card:#161D27; --ink:#E4EAF2; --muted:#98A4B5;
+  --line:#2A3441; --pen:#FF6B5D; --pen-soft:#3A201D; --sel:#93B2F0; --sel-soft:#1C283C;
+  --btn-ink:#10151D;
+}
+*{box-sizing:border-box}
+body{
+  font-family:var(--body); color:var(--ink); background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px);
+  background-size:100% 28px; font-size:16px; line-height:1.6;
+  padding-inline:16px; padding-block:24px 48px; min-height:100vh;
+}
+.wrap{max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:20px}
+header{display:flex; flex-direction:column; gap:4px}
+.eyebrow{font-size:13px; letter-spacing:.06em; color:var(--muted); font-weight:500}
+h1{font-family:var(--hand); font-weight:400; font-size:48px; line-height:1.05; margin:0; text-wrap:balance}
+.lead{margin:0; color:var(--muted); font-size:15px}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{
+  font:inherit; font-size:14px; font-weight:500; color:var(--ink); background:var(--card);
+  border:1px solid var(--line); border-radius:999px; padding:6px 14px; cursor:pointer;
+}
+.chip:hover{border-color:var(--sel)}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.chip .n{font-size:12px; opacity:.7; margin-left:4px; font-variant-numeric:tabular-nums}
+
+.day{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.day .date{font-size:20px; font-weight:600; font-variant-numeric:tabular-nums}
+.day .sub{flex-basis:100%; color:var(--muted); font-size:15px; margin:0}
+.nav{
+  font:inherit; width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
+  background:var(--card); color:var(--ink); cursor:pointer; font-size:14px;
+}
+.nav:disabled{opacity:.35; cursor:default}
+.badge{font-size:13px; border:1px solid var(--pen); color:var(--pen); border-radius:999px; padding:1px 10px; font-weight:500}
+.streak{font-family:var(--hand); font-size:24px; color:var(--pen); margin-left:auto}
+
+.dots{display:flex; flex-wrap:wrap; gap:6px}
+.dot{
+  width:28px; height:28px; border-radius:50%; border:1px solid var(--line); background:var(--card);
+  font-size:12px; display:grid; place-items:center; color:var(--muted); position:relative;
+  font-variant-numeric:tabular-nums;
+}
+.dot.now{border:2px solid var(--sel); color:var(--sel); font-weight:600}
+.dot.ok{border-color:var(--pen); color:var(--pen); font-weight:600}
+.dot.no{background:var(--paper)}
+.dot.no::after{content:""; position:absolute; width:2px; height:30px; background:var(--pen); transform:rotate(40deg); border-radius:2px}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px 20px; display:flex; flex-direction:column; gap:18px}
+.qhead{display:flex; gap:14px; align-items:flex-start}
+.qnum{position:relative; flex:none; width:52px; height:52px; display:grid; place-items:center; font-size:24px; font-weight:600; font-variant-numeric:tabular-nums}
+.meta{font-size:13px; color:var(--muted); letter-spacing:.02em; display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.tag{border:1px solid var(--line); border-radius:6px; padding:0 7px; font-size:12px}
+.qtext{font-size:17px; margin:4px 0 0; word-break:keep-all}
+.head{display:block; font-family:var(--en); font-size:30px; font-weight:600; margin-top:6px; line-height:1.2}
+.pos{font-family:var(--en); font-style:italic; font-size:15px; color:var(--muted); font-weight:500; margin-left:8px}
+.kor{display:block; font-size:24px; font-weight:600; margin-top:6px}
+.sentence{display:block; font-family:var(--en); font-size:19px; font-weight:500; margin-top:8px; line-height:1.55}
+.blank{display:inline-block; min-width:72px; border-bottom:2px solid var(--ink); margin-inline:2px; transform:translateY(-4px)}
+.en{font-family:var(--en); font-weight:500}
+
+.mark{position:absolute; inset:-6px; width:calc(100% + 12px); height:calc(100% + 12px); pointer-events:none; overflow:visible}
+.mark path{fill:none; stroke:var(--pen); stroke-width:4; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; animation:draw .45s ease-out forwards}
+.mark.small path{stroke-width:6}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+.choices{display:grid; gap:8px; list-style:none; margin:0; padding:0}
+.choice{
+  width:100%; text-align:left; font:inherit; color:var(--ink); background:var(--card);
+  border:1px solid var(--line); border-radius:10px; padding:10px 14px; cursor:pointer;
+  display:flex; gap:12px; align-items:center; min-height:48px;
+}
+.choice:hover:not(:disabled){background:var(--sel-soft); border-color:var(--sel)}
+.choice:disabled{cursor:default}
+.choice .lab{position:relative; flex:none; width:26px; height:26px; display:grid; place-items:center; font-size:18px; color:var(--muted)}
+.choice.right{border-color:var(--pen); background:var(--pen-soft)}
+.choice.right .lab{color:var(--pen)}
+.choice.picked-wrong{color:var(--muted)}
+.choice.dim{opacity:.55}
+
+.btn{
+  font:inherit; font-weight:600; font-size:15px; border-radius:10px; padding:10px 18px; cursor:pointer;
+  border:1px solid var(--ink); background:var(--ink); color:var(--btn-ink);
+}
+.btn.ghost{background:transparent; color:var(--ink); border-color:var(--line)}
+button:focus-visible{outline:2px solid var(--sel); outline-offset:2px}
+
+.verdict{font-family:var(--hand); font-size:32px; line-height:1.1; margin:0}
+.verdict.ok{color:var(--pen)}
+.sol{background:var(--paper); border-radius:10px; padding:14px 16px; font-size:15px; word-break:keep-all}
+.sol .k{display:block; font-size:12px; letter-spacing:.08em; color:var(--muted); font-weight:600; margin-bottom:4px}
+.row{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+
+.score{display:flex; flex-direction:column; align-items:center; gap:4px; padding-block:8px}
+.score .big{position:relative; font-family:var(--hand); font-size:72px; line-height:1; padding:10px 28px; color:var(--pen); font-variant-numeric:tabular-nums}
+.score p{margin:0; color:var(--muted); text-align:center}
+.wrong-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px}
+.wrong-list li{border:1px solid var(--line); border-radius:10px; padding:10px 14px; font-size:15px; word-break:keep-all}
+.empty{color:var(--muted); margin:0}
+footer{font-size:13px; color:var(--muted); text-align:center}
+@media (prefers-reduced-motion: reduce){ .mark path{animation:none; stroke-dashoffset:0} }
+@media (max-width:420px){ h1{font-size:42px} .card{padding:18px 16px} .head{font-size:26px} }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">고등 영어 · 수능 대비 단어 · 숙어 · 어법</span>
+    <h1>동그라미 영어 퀴즈</h1>
+    <p class="lead">매일 새 10문제가 나와요. 바로 채점하고, 틀린 문제는 오답노트에 모입니다.</p>
+  </header>
+
+  <nav class="chips" id="chips" aria-label="문제 종류"></nav>
+  <section class="day" id="day" aria-live="polite"></section>
+  <div class="dots" id="dots" aria-hidden="true"></div>
+  <main id="stage"></main>
+  <footer>숫자 키 1~5로 보기 선택, Enter로 다음 문제 · 오늘의 문제는 한국 시간 자정에 바뀝니다</footer>
+</div>
+
+<script>
+// ───────── 문제 데이터 (선생님이 추가·수정하는 곳) ─────────
+// 단어: 단어|품사(v 동사, a 형용사, n 명사, ad 부사)|뜻
+const VOCAB_TEXT = `
+abandon|v|포기하다, 버리다
+accelerate|v|가속하다
+accommodate|v|수용하다
+accompany|v|동반하다
+accomplish|v|성취하다
+acquire|v|습득하다
+adapt|v|적응하다
+advocate|v|옹호하다
+affect|v|영향을 미치다
+allocate|v|할당하다
+alter|v|바꾸다
+anticipate|v|예상하다
+assess|v|평가하다
+assume|v|가정하다
+attribute|v|(~의) 탓으로 돌리다
+cease|v|중단하다
+cite|v|인용하다
+coincide|v|동시에 일어나다
+collapse|v|붕괴하다
+commence|v|시작하다
+compensate|v|보상하다
+compile|v|편찬하다
+complement|v|보완하다
+compromise|v|타협하다
+conceal|v|숨기다
+concede|v|인정하다
+conform|v|순응하다
+conserve|v|보존하다
+contaminate|v|오염시키다
+contradict|v|모순되다
+contribute|v|기여하다
+convey|v|전달하다
+cultivate|v|경작하다
+decline|v|감소하다
+demonstrate|v|입증하다
+deny|v|부인하다
+depict|v|묘사하다
+deprive|v|빼앗다
+derive|v|끌어내다
+detect|v|감지하다
+deteriorate|v|악화되다
+devote|v|헌신하다
+disguise|v|위장하다
+distort|v|왜곡하다
+dominate|v|지배하다
+donate|v|기부하다
+eliminate|v|제거하다
+emerge|v|나타나다
+emphasize|v|강조하다
+encounter|v|마주치다
+endure|v|견디다
+enhance|v|향상시키다
+ensure|v|보장하다
+evolve|v|진화하다
+exaggerate|v|과장하다
+exceed|v|초과하다
+exhaust|v|고갈시키다
+expand|v|확장하다
+exploit|v|착취하다
+facilitate|v|용이하게 하다
+frustrate|v|좌절시키다
+generate|v|생성하다
+hesitate|v|망설이다
+ignore|v|무시하다
+illuminate|v|조명하다
+imitate|v|모방하다
+implement|v|실행하다
+imply|v|암시하다
+impose|v|부과하다
+infer|v|추론하다
+inhibit|v|억제하다
+inspire|v|영감을 주다
+integrate|v|통합하다
+interpret|v|해석하다
+intervene|v|개입하다
+isolate|v|고립시키다
+justify|v|정당화하다
+launch|v|출시하다
+linger|v|오래 머무르다
+manipulate|v|조작하다
+maximize|v|극대화하다
+mediate|v|중재하다
+migrate|v|이주하다
+minimize|v|최소화하다
+motivate|v|동기를 부여하다
+neglect|v|방치하다
+nurture|v|양육하다
+occupy|v|차지하다
+offend|v|기분을 상하게 하다
+overcome|v|극복하다
+perceive|v|인식하다
+persist|v|지속하다
+persuade|v|설득하다
+prevail|v|우세하다
+prohibit|v|금지하다
+prompt|v|촉발하다
+pursue|v|추구하다
+reconcile|v|화해시키다
+resemble|v|닮다
+reside|v|거주하다
+resolve|v|해결하다
+restore|v|복원하다
+retain|v|보유하다
+reveal|v|드러내다
+stimulate|v|자극하다
+substitute|v|대체하다
+surround|v|둘러싸다
+undergo|v|겪다
+undermine|v|약화시키다
+utilize|v|활용하다
+vary|v|달라지다
+withdraw|v|철회하다
+abundant|a|풍부한
+accurate|a|정확한
+adequate|a|적절한
+adjacent|a|인접한
+ambiguous|a|모호한
+arbitrary|a|임의의
+authentic|a|진짜의
+available|a|이용 가능한
+benevolent|a|자비로운
+comprehensive|a|포괄적인
+considerable|a|상당한
+consistent|a|일관된
+contemporary|a|동시대의
+crucial|a|중대한
+deliberate|a|의도적인
+distinct|a|뚜렷한
+diverse|a|다양한
+durable|a|내구성 있는
+enormous|a|거대한
+entire|a|전체의
+explicit|a|명시적인
+extinct|a|멸종된
+feasible|a|실현 가능한
+fragile|a|깨지기 쉬운
+fundamental|a|근본적인
+hostile|a|적대적인
+identical|a|동일한
+inevitable|a|불가피한
+inherent|a|내재된
+intense|a|강렬한
+legitimate|a|합법적인
+modest|a|겸손한
+monotonous|a|단조로운
+mutual|a|상호의
+novel|a|참신한
+obsolete|a|구식의
+optimistic|a|낙관적인
+ordinary|a|평범한
+plausible|a|그럴듯한
+potential|a|잠재적인
+prominent|a|저명한
+reluctant|a|꺼리는
+remarkable|a|주목할 만한
+rigid|a|경직된
+scarce|a|부족한
+skeptical|a|회의적인
+solitary|a|고독한
+sophisticated|a|정교한
+spontaneous|a|자발적인
+stable|a|안정된
+subsequent|a|이후의
+subtle|a|미묘한
+superficial|a|피상적인
+temporary|a|일시적인
+transparent|a|투명한
+valid|a|유효한
+vivid|a|생생한
+vulnerable|a|취약한
+barrier|n|장벽
+bias|n|편견
+burden|n|부담
+capacity|n|수용력
+circumstance|n|상황
+consequence|n|결과
+controversy|n|논란
+curiosity|n|호기심
+deficiency|n|결핍
+empathy|n|공감
+hazard|n|위험 요소
+incentive|n|유인책
+insight|n|통찰력
+notion|n|개념
+obligation|n|의무
+perspective|n|관점
+phenomenon|n|현상
+property|n|재산
+proportion|n|비율
+prospect|n|전망
+remedy|n|치료법
+scrutiny|n|정밀 조사
+sequence|n|순서
+tendency|n|경향
+vehicle|n|차량
+likewise|ad|마찬가지로
+nevertheless|ad|그럼에도 불구하고
+thereby|ad|그렇게 함으로써
+`;
+
+// 숙어: 숙어|뜻
+const IDIOM_TEXT = `
+account for|설명하다
+break down|고장 나다
+bring about|초래하다
+bring up|기르다
+call off|취소하다
+carry out|수행하다
+come up with|생각해 내다
+count on|의지하다
+cut down on|줄이다
+deal with|다루다
+figure out|알아내다
+get along with|~와 잘 지내다
+get rid of|제거하다
+give up|포기하다
+go through|겪다
+hand in|제출하다
+keep up with|~에 뒤처지지 않다
+look after|돌보다
+look forward to|고대하다
+look up to|존경하다
+make up for|만회하다
+make sense|이치에 맞다
+put off|미루다
+put up with|참다
+run out of|~을 다 써버리다
+set up|설립하다
+show up|나타나다
+stand for|상징하다
+take after|닮다
+take part in|참가하다
+take place|개최되다
+turn down|거절하다
+turn out|~로 판명되다
+be about to|막 ~하려 하다
+be likely to|~할 것 같다
+in charge of|~을 담당하는
+in terms of|~의 측면에서
+on behalf of|~을 대표하여
+in spite of|~에도 불구하고
+as a result of|~의 결과로
+by chance|우연히
+at the expense of|~을 희생하여
+for the sake of|~을 위하여
+in advance|미리
+on purpose|고의로
+once in a while|가끔
+pay attention to|~에 주의를 기울이다
+be aware of|~을 알고 있다
+be responsible for|~에 책임이 있다
+take advantage of|~을 이용하다
+point out|지적하다
+rule out|배제하다
+`;
+
+// 어법: s 문장(빈칸은 ___), c 보기 5개, a 정답 번호(0부터), e 해설
+const GRAMMAR = [
+  { s:`If I ___ rich, I would travel around the world.`, c:['am','were','will be','have been','being'], a:1, e:`가정법 과거: If + 주어 + 과거동사(be동사는 were), 주어 + would + 동사원형` },
+  { s:`She has lived in Seoul ___ 2010.`, c:['for','since','during','at','by'], a:1, e:`현재완료와 함께 시작 시점을 나타낼 때는 since를 써요. for 뒤에는 기간(ten years)이 옵니다.` },
+  { s:`The book ___ I bought yesterday is interesting.`, c:['which','what','who','where','whose'], a:0, e:`선행사 the book(사물)을 받는 목적격 관계대명사 which. what은 선행사를 포함하므로 쓸 수 없어요.` },
+  { s:`I am looking forward to ___ you again.`, c:['see','seeing','saw','seen','sees'], a:1, e:`look forward to의 to는 전치사라서 뒤에 동명사(-ing)가 와요.` },
+  { s:`He stopped ___ when the teacher came in.`, c:['talk','talking','talked','talks','be talking'], a:1, e:`stop + -ing는 ‘~하던 것을 멈추다’. stop + to부정사는 ‘~하기 위해 멈추다’라는 뜻이에요.` },
+  { s:`Neither Tom nor his friends ___ at the party.`, c:['was','were','is','be','has been'], a:1, e:`neither A nor B는 B(his friends)에 동사의 수를 맞춰요. 복수이므로 were.` },
+  { s:`The number of students ___ increasing every year.`, c:['is','are','were','be','have'], a:0, e:`the number of(~의 수)는 단수 취급. a number of(많은)는 복수 취급이에요.` },
+  { s:`A number of students ___ absent today.`, c:['is','are','was','has','be'], a:1, e:`a number of + 복수명사는 ‘많은 ~’이라는 뜻으로 복수 동사를 써요.` },
+  { s:`This is the house ___ I was born.`, c:['which','where','what','who','whose'], a:1, e:`뒤에 완전한 문장이 오고 장소 선행사를 받으므로 관계부사 where. (= in which)` },
+  { s:`___ tired, she went to bed early.`, c:['Feel','Feeling','Felt','Feels','To feeling'], a:1, e:`주어 she가 피곤함을 ‘느끼는’ 능동 관계라서 현재분사로 시작하는 분사구문 Feeling.` },
+  { s:`The letter ___ to her yesterday.`, c:['sent','was sent','sends','is sending','has sent'], a:1, e:`편지는 ‘보내지는’ 대상이고 yesterday가 있으므로 과거 수동태 was sent.` },
+  { s:`She made him ___ the room.`, c:['clean','to clean','cleaning','cleaned','cleans'], a:0, e:`사역동사 make + 목적어 + 동사원형. (목적어가 능동으로 하는 일)` },
+  { s:`I had my car ___ yesterday.`, c:['repair','repaired','repairing','to repair','repairs'], a:1, e:`have + 목적어 + 과거분사: 차가 ‘수리되는’ 수동 관계예요.` },
+  { s:`It is important ___ you to exercise regularly.`, c:['for','of','to','with','by'], a:0, e:`to부정사의 의미상 주어는 보통 for + 목적격. important, easy 등 일반 형용사 뒤에 써요.` },
+  { s:`It was kind ___ you to help me.`, c:['for','of','to','with','by'], a:1, e:`kind, nice, foolish처럼 사람의 성격을 나타내는 형용사 뒤에는 of + 목적격을 써요.` },
+  { s:`He is the tallest ___ the three boys.`, c:['in','of','than','at','for'], a:1, e:`최상급 뒤 비교 대상이 복수의 무리일 때는 of, 장소나 범위일 때는 in을 써요.` },
+  { s:`The more you practice, ___ you become.`, c:['better','the better','best','the best','good'], a:1, e:`the 비교급 ~, the 비교급 …: ‘~할수록 더 …하다’` },
+  { s:`I wish I ___ harder when I was young.`, c:['study','studied','had studied','have studied','would study'], a:2, e:`과거 사실에 대한 아쉬움은 I wish + 가정법 과거완료(had + 과거분사).` },
+  { s:`By the time he arrived, the movie ___.`, c:['starts','started','had started','has started','will start'], a:2, e:`그가 도착한 과거 시점보다 더 먼저 일어난 일이므로 과거완료 had started.` },
+  { s:`She is used to ___ up early.`, c:['get','getting','got','gets','be got'], a:1, e:`be used to + -ing: ‘~하는 데 익숙하다’. 이때 to는 전치사예요.` },
+  { s:`He used to ___ soccer every weekend.`, c:['play','playing','played','plays','be played'], a:0, e:`used to + 동사원형: ‘(과거에) ~하곤 했다’` },
+  { s:`Hardly ___ the station when the train left.`, c:['I reached','did I reach','I had reached','had I reached','I reach'], a:3, e:`Hardly + had + 주어 + 과거분사 ~ when …: ‘~하자마자 …했다’. 부정어가 앞에 오면 도치돼요.` },
+  { s:`The man ___ car was stolen called the police.`, c:['who','whose','which','whom','what'], a:1, e:`뒤의 car를 수식하며 ‘그 남자의 차’라는 소유 관계이므로 소유격 관계대명사 whose.` },
+  { s:`___ he was sick, he went to school.`, c:['Although','Because','Despite','Unless','If'], a:0, e:`‘아팠지만 학교에 갔다’는 양보의 의미이고 뒤에 절이 오므로 접속사 Although. Despite 뒤에는 명사가 와요.` },
+  { s:`___ the heavy rain, the game continued.`, c:['Although','Despite','Because','Unless','While'], a:1, e:`뒤에 명사구(the heavy rain)가 오므로 전치사 Despite. Although 뒤에는 절이 와요.` },
+  { s:`Would you mind ___ the window?`, c:['open','opening','to open','opened','opens'], a:1, e:`mind는 동명사를 목적어로 취하는 동사예요.` },
+  { s:`She decided ___ abroad next year.`, c:['study','studying','to study','studied','studies'], a:2, e:`decide는 to부정사를 목적어로 취해요. (want, plan, hope도 마찬가지)` },
+  { s:`I'm not sure ___ he will come tomorrow.`, c:['because','whether','what','which','who'], a:1, e:`‘~인지 아닌지’를 나타내는 명사절 접속사 whether.` },
+  { s:`The boy was seen ___ the street.`, c:['cross','to cross','crossed','crosses','be crossed'], a:1, e:`지각동사 see의 수동태에서는 동사원형이 to부정사로 바뀌어요. (was seen to cross)` },
+  { s:`There ___ many people in the park.`, c:['is','are','was','has','be'], a:1, e:`There + be동사 뒤의 명사(many people)가 주어이므로 복수 동사 are.` },
+  { s:`Each of the students ___ a laptop.`, c:['have','has','having','are','were'], a:1, e:`each of + 복수명사는 단수 취급해요.` },
+  { s:`What he said ___ true.`, c:['is','are','were','be','being'], a:0, e:`what이 이끄는 명사절 주어는 단수 취급해요.` },
+  { s:`She speaks English as ___ as a native speaker.`, c:['fluent','fluently','more fluently','most fluent','fluency'], a:1, e:`동사 speaks를 꾸미므로 부사 fluently. as ~ as 사이에는 원급이 와요.` },
+  { s:`You ___ have seen him yesterday. He was abroad then.`, c:['must','can’t','should','will','may'], a:1, e:`can’t have + 과거분사: ‘~했을 리가 없다’. 그때 외국에 있었으니 봤을 리가 없어요.` },
+  { s:`He was ___ tired that he fell asleep at once.`, c:['so','such','too','very','enough'], a:0, e:`so + 형용사 + that: ‘너무 ~해서 …하다’` },
+  { s:`It was ___ a nice day that we went on a picnic.`, c:['so','such','too','very','much'], a:1, e:`such + a + 형용사 + 명사 + that. 명사(day)가 있으므로 such를 써요.` },
+  { s:`I found the movie very ___.`, c:['interest','interesting','interested','interests','to interest'], a:1, e:`영화가 흥미를 ‘주는’ 것이므로 현재분사 interesting.` },
+  { s:`She was very ___ in the movie.`, c:['interest','interesting','interested','interests','to interest'], a:2, e:`그녀가 흥미를 ‘느끼는’ 것이므로 과거분사 interested.` },
+  { s:`Not only he but also I ___ happy with the result.`, c:['am','is','are','be','being'], a:0, e:`not only A but also B는 B(I)에 동사를 맞춰요.` },
+  { s:`I would rather ___ at home tonight.`, c:['stay','staying','to stay','stayed','stays'], a:0, e:`would rather + 동사원형: ‘차라리 ~하겠다’` },
+  { s:`I have ___ finished my homework.`, c:['already','yet','still','ever','since'], a:0, e:`긍정문 현재완료에서 ‘이미’는 already. yet은 부정문·의문문에 써요.` },
+  { s:`The news ___ surprising to everyone.`, c:['was','were','are','have been','be'], a:0, e:`news는 -s로 끝나지만 셀 수 없는 명사라 단수 취급해요.` },
+];
+// ─────────────────────────────────────────────────────────
+
+const POS = { v: 'v.', a: 'adj.', n: 'n.', ad: 'adv.' };
+const POS_KO = { v: '동사', a: '형용사', n: '명사', ad: '부사' };
+const VOCAB = VOCAB_TEXT.trim().split('\n').map(l => { const [w, p, m] = l.split('|'); return { w, p, m }; });
+const IDIOMS = IDIOM_TEXT.trim().split('\n').map(l => { const [w, m] = l.split('|'); return { w, m }; });
+const PER_DAY = { vocab: 6, idiom: 2, grammar: 2 };
+const EPOCH = '2026-01-01';
+
+const LABELS = ['①','②','③','④','⑤'];
+const CIRCLE = 'M50 7C79 5 95 29 93 54C90 82 61 96 38 91C15 86 4 61 9 38C14 17 35 5 60 9';
+const SLASH = 'M18 88L84 10';
+const STORE_WRONG = 'dongeurami-english-wrong';
+const STORE_DONE = 'dongeurami-english-done';
+const $ = s => document.querySelector(s);
+
+// ── 날짜 (한국 시간) ──
+function kstToday() {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+}
+function toUTC(d) { const [y, m, dd] = d.split('-').map(Number); return Date.UTC(y, m - 1, dd); }
+function addDays(d, n) { return new Date(toUTC(d) + n * 864e5).toISOString().slice(0, 10); }
+function dayIndex(d) { return Math.round((toUTC(d) - toUTC(EPOCH)) / 864e5); }
+function dateLabel(d) {
+  const dt = new Date(toUTC(d));
+  return `${dt.getUTCMonth() + 1}월 ${dt.getUTCDate()}일 (${'일월화수목금토'[dt.getUTCDay()]})`;
+}
+
+// ── 날짜로 정해지는 난수 ──
+function hash(str) { let h = 2166136261; for (const ch of str) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) {
+  let a = hash(String(seed));
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function shuffle(arr, rand) { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+// 한 바퀴를 다 돌 때까지 같은 문제가 다시 나오지 않도록, 바퀴마다 새로 섞은 순서에서 차례로 꺼냄
+function pickCycle(kind, total, day, count) {
+  const out = [];
+  for (let k = 0; k < count; k++) {
+    const pos = day * count + k;
+    const order = shuffle([...Array(total).keys()], rng(`${kind}-cycle-${Math.floor(pos / total)}`));
+    out.push(order.at(pos % total));
+  }
+  return out;
+}
+
+// ── 문제 만들기 ──
+function esc(s) { return String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch])); }
+
+function vocabQ(i, dir, rand) {
+  const it = VOCAB.at(i);
+  // 같은 품사에서 오답을 고르고, 모자라면(부사 등) 다른 품사에서 채움
+  const same = shuffle(VOCAB.filter((v, j) => j !== i && v.p === it.p && v.m !== it.m), rand);
+  const rest = shuffle(VOCAB.filter(v => v.p !== it.p), rand);
+  const others = [...same, ...rest].slice(0, 4);
+  const opts = shuffle([it, ...others], rand);
+  const ans = opts.indexOf(it);
+  if (dir === 'wm') {
+    return { src: `v${i}`, cat: '단어', kind: '뜻 고르기', ans,
+      q: `다음 단어의 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}<span class="pos">${POS[it.p]}</span></span>`,
+      choices: opts.map(o => esc(o.m)),
+      sol: `<span class="en">${esc(it.w)}</span> (${POS_KO[it.p]}) ${esc(it.m)}` };
+  }
+  return { src: `v${i}`, cat: '단어', kind: '단어 고르기', ans,
+    q: `다음 뜻을 가진 단어는?<span class="kor">${esc(it.m)}</span>`,
+    choices: opts.map(o => `<span class="en">${esc(o.w)}</span>`),
+    sol: opts.map(o => `<span class="en">${esc(o.w)}</span> ${esc(o.m)}`).join(' · ') };
+}
+function idiomQ(i, rand) {
+  const it = IDIOMS.at(i);
+  const others = shuffle(IDIOMS.filter((v, j) => j !== i && v.m !== it.m), rand).slice(0, 4);
+  const opts = shuffle([it, ...others], rand);
+  return { src: `i${i}`, cat: '숙어', kind: '뜻 고르기', ans: opts.indexOf(it),
+    q: `다음 숙어의 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}</span>`,
+    choices: opts.map(o => esc(o.m)),
+    sol: `<span class="en">${esc(it.w)}</span> ${esc(it.m)}` };
+}
+function grammarQ(i, rand) {
+  const g = GRAMMAR.at(i);
+  const order = shuffle([0, 1, 2, 3, 4], rand);
+  const sentence = esc(g.s).replace('___', '<span class="blank"></span>');
+  return { src: `g${i}`, cat: '어법', kind: '빈칸 채우기', ans: order.indexOf(g.a),
+    q: `빈칸에 들어갈 말로 알맞은 것은?<span class="sentence">${sentence}</span>`,
+    choices: order.map(k => `<span class="en">${esc(g.c.at(k))}</span>`),
+    sol: `정답 <span class="en">${esc(g.c.at(g.a))}</span>. ${esc(g.e)}` };
+}
+function fromSrc(src, rand) {
+  const i = Number(src.slice(1));
+  if (src[0] === 'v') return vocabQ(i, rand() < 0.5 ? 'wm' : 'mw', rand);
+  if (src[0] === 'i') return idiomQ(i, rand);
+  return grammarQ(i, rand);
+}
+
+function dailyDeck(date) {
+  const d = dayIndex(date);
+  const rand = rng(`day-${date}`);
+  const v = pickCycle('vocab', VOCAB.length, d, PER_DAY.vocab);
+  const qs = [
+    ...v.slice(0, 4).map(i => vocabQ(i, 'wm', rand)),
+    ...v.slice(4).map(i => vocabQ(i, 'mw', rand)),
+    ...pickCycle('idiom', IDIOMS.length, d, PER_DAY.idiom).map(i => idiomQ(i, rand)),
+    ...pickCycle('grammar', GRAMMAR.length, d, PER_DAY.grammar).map(i => grammarQ(i, rand)),
+  ];
+  return qs;
+}
+function practiceDeck(cat) {
+  const rand = Math.random;
+  if (cat === '단어') return shuffle([...VOCAB.keys()], rand).slice(0, 10).map(i => vocabQ(i, rand() < 0.5 ? 'wm' : 'mw', rand));
+  if (cat === '숙어') return shuffle([...IDIOMS.keys()], rand).slice(0, 10).map(i => idiomQ(i, rand));
+  if (cat === '어법') return shuffle([...GRAMMAR.keys()], rand).slice(0, 10).map(i => grammarQ(i, rand));
+  return shuffle([...loadSet(STORE_WRONG)], rand).slice(0, 10).map(s => fromSrc(s, rand));
+}
+
+// ── 저장 (학생 브라우저) ──
+function loadSet(key) { try { return new Set(JSON.parse(localStorage.getItem(key) || '[]')); } catch { return new Set(); } }
+function saveSet(key, set) { try { localStorage.setItem(key, JSON.stringify([...set])); } catch {} }
+function loadDone() { try { return JSON.parse(localStorage.getItem(STORE_DONE) || '{}'); } catch { return {}; } }
+function saveDone(obj) { try { localStorage.setItem(STORE_DONE, JSON.stringify(obj)); } catch {} }
+function streak() {
+  const done = loadDone();
+  let d = done[TODAY] ? TODAY : addDays(TODAY, -1), n = 0;
+  while (done[d]) { n++; d = addDays(d, -1); }
+  return n;
+}
+
+// ── 상태 ──
+const TODAY = kstToday();
+let mode = '오늘의 퀴즈';
+let viewDate = TODAY;
+let deck = [], idx = 0, results = [];
+let retrying = false; // '틀린 문제만 다시'일 때는 그날 점수를 덮어쓰지 않음
+
+function mark(kind, small) {
+  return `<svg class="mark${small ? ' small' : ''}" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="1" d="${kind === 'ok' ? CIRCLE : SLASH}"/></svg>`;
+}
+
+function renderChips() {
+  const counts = { '오늘의 퀴즈': 10, '단어': VOCAB.length, '숙어': IDIOMS.length, '어법': GRAMMAR.length, '오답노트': loadSet(STORE_WRONG).size };
+  $('#chips').innerHTML = Object.entries(counts).map(([k, n]) =>
+    `<button class="chip" type="button" data-mode="${k}" aria-pressed="${k === mode}">${k}<span class="n">${n}</span></button>`).join('');
+}
+
+function renderDay() {
+  if (mode === '오늘의 퀴즈') {
+    const done = loadDone()[viewDate];
+    const s = streak();
+    $('#day').innerHTML = `
+      <button class="nav" type="button" data-act="prev" aria-label="전날 문제">◀</button>
+      <span class="date">${dateLabel(viewDate)}</span>
+      <button class="nav" type="button" data-act="next-day" aria-label="다음날 문제" ${viewDate >= TODAY ? 'disabled' : ''}>▶</button>
+      ${done ? `<span class="badge">완료 ${done.right}/${done.total}</span>` : ''}
+      ${s ? `<span class="streak">연속 ${s}일</span>` : ''}
+      <p class="sub">${viewDate === TODAY ? '오늘의 10문제: 단어 6 · 숙어 2 · 어법 2' : '지난 날의 문제예요. 놓친 날을 채워 보세요.'}</p>`;
+  } else {
+    const sub = mode === '오답노트' ? '틀린 문제에서 10문제를 골라요. 다시 맞히면 오답노트에서 빠집니다.' : `${mode} 문제에서 무작위로 10문제를 골라요.`;
+    $('#day').innerHTML = `<span class="date">${mode} 연습</span><p class="sub">${sub}</p>`;
+  }
+}
+
+function start() {
+  deck = mode === '오늘의 퀴즈' ? dailyDeck(viewDate) : practiceDeck(mode);
+  idx = 0; results = []; retrying = false;
+  renderChips(); renderDay(); render();
+}
+
+function renderDots() {
+  $('#dots').innerHTML = deck.map((_, i) => {
+    const r = results.at(i);
+    return `<span class="dot ${r ? (r.correct ? 'ok' : 'no') : (i === idx ? 'now' : '')}">${i + 1}</span>`;
+  }).join('');
+}
+
+function render() {
+  renderDots();
+  const stage = $('#stage');
+  if (!deck.length) {
+    stage.innerHTML = `<div class="card"><p class="empty">오답노트가 비어 있어요. 문제를 풀다 틀리면 여기에 모입니다.</p>
+      <div class="row"><button class="btn" type="button" data-mode="오늘의 퀴즈">오늘의 퀴즈 풀기</button></div></div>`;
+    return;
+  }
+  stage.innerHTML = idx < deck.length ? questionHTML(deck.at(idx)) : summaryHTML();
+}
+
+function questionHTML(q) {
+  const res = results.at(idx);
+  const done = !!res;
+  const list = q.choices.map((c, i) => {
+    let cls = '', m = '';
+    if (done) {
+      if (i === q.ans) { cls = 'right'; m = mark('ok', true); }
+      else if (i === res.picked) { cls = 'picked-wrong'; m = mark('no', true); }
+      else cls = 'dim';
+    }
+    return `<li><button class="choice ${cls}" type="button" data-pick="${i}" ${done ? 'disabled' : ''}>
+      <span class="lab">${LABELS.at(i)}${m}</span><span>${c}</span></button></li>`;
+  }).join('');
+  const last = idx === deck.length - 1;
+  const feedback = done ? `
+    <p class="verdict ${res.correct ? 'ok' : ''}" role="status">${res.correct ? '정답이에요!' : `아쉬워요. 정답은 ${LABELS.at(q.ans)}`}</p>
+    <div class="sol"><span class="k">해설</span>${q.sol}</div>
+    <div class="row"><button class="btn" type="button" data-act="next" id="next-btn">${last ? '결과 보기' : '다음 문제 →'}</button></div>` : '';
+  return `<article class="card">
+    <div class="qhead">
+      <div class="qnum">${idx + 1}${done ? mark(res.correct ? 'ok' : 'no') : ''}</div>
+      <div>
+        <div class="meta"><span>${q.cat}</span><span class="tag">${q.kind}</span></div>
+        <p class="qtext">${q.q}</p>
+      </div>
+    </div>
+    <ol class="choices">${list}</ol>
+    ${feedback}
+  </article>`;
+}
+
+function summaryHTML() {
+  const total = deck.length;
+  const right = results.filter(r => r?.correct).length;
+  const wrongQs = deck.filter((_, i) => !results.at(i)?.correct);
+  const isDaily = mode === '오늘의 퀴즈';
+  const msg = right === total ? '전부 맞혔어요!' : right / total >= 0.7 ? '잘했어요. 틀린 문제만 한 번 더 보세요.' : '해설을 읽고 다시 풀어 봐요.';
+  const tail = isDaily && viewDate === TODAY ? ' 내일 새 문제가 나와요.' : '';
+  return `<article class="card">
+    <div class="score"><span class="big">${right} / ${total}${mark('ok')}</span><p>${msg}${tail}</p></div>
+    ${wrongQs.length ? `<ul class="wrong-list">${wrongQs.map(q => `<li><div class="meta"><span>${q.cat}</span></div>${q.sol}</li>`).join('')}</ul>` : ''}
+    <div class="row">
+      ${wrongQs.length ? '<button class="btn ghost" type="button" data-act="retry-wrong">틀린 문제만 다시</button>' : ''}
+      <button class="btn" type="button" data-act="restart">${isDaily ? '이 날 문제 다시 풀기' : '새 10문제'}</button>
+    </div>
+  </article>`;
+}
+
+function answer(i) {
+  const q = deck.at(idx);
+  if (!q || results.at(idx)) return;
+  const correct = i === q.ans;
+  results[idx] = { correct, picked: i };
+  const wrong = loadSet(STORE_WRONG);
+  correct ? wrong.delete(q.src) : wrong.add(q.src);
+  saveSet(STORE_WRONG, wrong);
+  if (mode === '오늘의 퀴즈' && !retrying && results.filter(Boolean).length === deck.length) {
+    const done = loadDone();
+    done[viewDate] = { right: results.filter(r => r.correct).length, total: deck.length };
+    saveDone(done);
+    renderDay();
+  }
+  renderChips();
+  render();
+  $('#next-btn')?.focus({ preventScroll: true });
+}
+
+function next() { idx += 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+document.addEventListener('click', e => {
+  const m = e.target.closest('[data-mode]');
+  if (m) { mode = m.dataset.mode; viewDate = TODAY; start(); return; }
+  const pick = e.target.closest('[data-pick]');
+  if (pick && !pick.disabled) { answer(Number(pick.dataset.pick)); return; }
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'next') next();
+  if (act === 'restart') start();
+  if (act === 'prev') { viewDate = addDays(viewDate, -1); start(); }
+  if (act === 'next-day' && viewDate < TODAY) { viewDate = addDays(viewDate, 1); start(); }
+  if (act === 'retry-wrong') {
+    const again = deck.filter((_, i) => !results.at(i)?.correct);
+    deck = again; idx = 0; results = []; retrying = true; render();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  const q = deck.at(idx);
+  if (!q) return;
+  if (!results.at(idx) && /^[1-5]$/.test(e.key)) answer(Number(e.key) - 1);
+  else if (e.key === 'Enter' && results.at(idx) && !e.target.closest('button')) next();
+});
+
+start();
+</script>
+
+</body>
+</html>
