@@ -88,6 +88,15 @@ h1{font-family:var(--hand); font-weight:400; font-size:48px; line-height:1.05; m
 .sentence{display:block; font-family:var(--en); font-size:19px; font-weight:500; margin-top:8px; line-height:1.55}
 .blank{display:inline-block; min-width:72px; border-bottom:2px solid var(--ink); margin-inline:2px; transform:translateY(-4px)}
 .en{font-family:var(--en); font-weight:500}
+.say{
+  display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+  font:inherit; font-size:14px; font-weight:500; color:var(--sel); background:var(--sel-soft);
+  border:1px solid transparent; border-radius:999px; padding:5px 14px 5px 10px; cursor:pointer;
+}
+.say:hover{border-color:var(--sel)}
+.say svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+.say.playing{background:var(--sel); color:var(--card)}
+.row .say{margin-right:auto; align-self:center}
 
 .mark{position:absolute; inset:-6px; width:calc(100% + 12px); height:calc(100% + 12px); pointer-events:none; overflow:visible}
 .mark path{fill:none; stroke:var(--pen); stroke-width:4; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1; animation:draw .45s ease-out forwards}
@@ -509,12 +518,12 @@ function vocabQ(i, dir, rand) {
   const opts = shuffle([it, ...others], rand);
   const ans = opts.indexOf(it);
   if (dir === 'wm') {
-    return { src: `v${i}`, cat: '단어', kind: '뜻 고르기', ans,
+    return { src: `v${i}`, cat: '단어', kind: '뜻 고르기', ans, say: it.w,
       q: `다음 단어의 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}<span class="pos">${POS[it.p]}</span></span>`,
       choices: opts.map(o => esc(o.m)),
       sol: `<span class="en">${esc(it.w)}</span> (${POS_KO[it.p]}) ${esc(it.m)}` };
   }
-  return { src: `v${i}`, cat: '단어', kind: '단어 고르기', ans,
+  return { src: `v${i}`, cat: '단어', kind: '단어 고르기', ans, sayAfter: it.w, sayLabel: '정답 발음 듣기',
     q: `다음 뜻을 가진 단어는?<span class="kor">${esc(it.m)}</span>`,
     choices: opts.map(o => `<span class="en">${esc(o.w)}</span>`),
     sol: opts.map(o => `<span class="en">${esc(o.w)}</span> ${esc(o.m)}`).join(' · ') };
@@ -523,7 +532,7 @@ function idiomQ(i, rand) {
   const it = IDIOMS.at(i);
   const others = shuffle(IDIOMS.filter((v, j) => j !== i && v.m !== it.m), rand).slice(0, 4);
   const opts = shuffle([it, ...others], rand);
-  return { src: `i${i}`, cat: '숙어', kind: '뜻 고르기', ans: opts.indexOf(it),
+  return { src: `i${i}`, cat: '숙어', kind: '뜻 고르기', ans: opts.indexOf(it), say: it.w,
     q: `다음 숙어의 뜻으로 알맞은 것은?<span class="head">${esc(it.w)}</span>`,
     choices: opts.map(o => esc(o.m)),
     sol: `<span class="en">${esc(it.w)}</span> ${esc(it.m)}` };
@@ -533,6 +542,7 @@ function grammarQ(i, rand) {
   const order = shuffle([0, 1, 2, 3, 4], rand);
   const sentence = esc(g.s).replace('___', '<span class="blank"></span>');
   return { src: `g${i}`, cat: '어법', kind: '빈칸 채우기', ans: order.indexOf(g.a),
+    sayAfter: g.s.replace('___', g.c.at(g.a)), sayLabel: '완성 문장 듣기',
     q: `빈칸에 들어갈 말로 알맞은 것은?<span class="sentence">${sentence}</span>`,
     choices: order.map(k => `<span class="en">${esc(g.c.at(k))}</span>`),
     sol: `정답 <span class="en">${esc(g.c.at(g.a))}</span>. ${esc(g.e)}` };
@@ -582,6 +592,35 @@ let mode = '오늘의 퀴즈';
 let viewDate = TODAY;
 let deck = [], idx = 0, results = [];
 let retrying = false; // '틀린 문제만 다시'일 때는 그날 점수를 덮어쓰지 않음
+
+// ── 발음 듣기 (브라우저 내장 음성) ──
+const CAN_SPEAK = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const SPEAKER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+function englishVoice() {
+  const voices = window.speechSynthesis.getVoices().filter(v => /^en(-|_|$)/i.test(v.lang));
+  return voices.find(v => /en[-_]US/i.test(v.lang) && /google|samantha|aria|jenny|natural/i.test(v.name))
+    || voices.find(v => /en[-_]US/i.test(v.lang)) || voices.at(0) || null;
+}
+function speak(text, btn) {
+  if (!CAN_SPEAK) return;
+  try {
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.9;
+    const v = englishVoice();
+    if (v) u.voice = v;
+    document.querySelectorAll('.say.playing').forEach(b => b.classList.remove('playing'));
+    btn?.classList.add('playing');
+    u.onend = u.onerror = () => btn?.classList.remove('playing');
+    synth.speak(u);
+  } catch {}
+}
+function sayButton(text, label) {
+  return CAN_SPEAK ? `<button class="say" type="button" data-say="${esc(text)}">${SPEAKER}${label}</button>` : '';
+}
+if (CAN_SPEAK) window.speechSynthesis.getVoices();
 
 function mark(kind, small) {
   return `<svg class="mark${small ? ' small' : ''}" viewBox="0 0 100 100" aria-hidden="true"><path pathLength="1" d="${kind === 'ok' ? CIRCLE : SLASH}"/></svg>`;
@@ -651,7 +690,7 @@ function questionHTML(q) {
   const feedback = done ? `
     <p class="verdict ${res.correct ? 'ok' : ''}" role="status">${res.correct ? '정답이에요!' : `아쉬워요. 정답은 ${LABELS.at(q.ans)}`}</p>
     <div class="sol"><span class="k">해설</span>${q.sol}</div>
-    <div class="row"><button class="btn" type="button" data-act="next" id="next-btn">${last ? '결과 보기' : '다음 문제 →'}</button></div>` : '';
+    <div class="row">${q.sayAfter ? sayButton(q.sayAfter, q.sayLabel) : ''}<button class="btn" type="button" data-act="next" id="next-btn">${last ? '결과 보기' : '다음 문제 →'}</button></div>` : '';
   return `<article class="card">
     <div class="qhead">
       <div class="qnum">${idx + 1}${done ? mark(res.correct ? 'ok' : 'no') : ''}</div>
@@ -660,6 +699,7 @@ function questionHTML(q) {
         <p class="qtext">${q.q}</p>
       </div>
     </div>
+    ${q.say ? sayButton(q.say, '발음 듣기') : ''}
     <ol class="choices">${list}</ol>
     ${feedback}
   </article>`;
@@ -701,9 +741,11 @@ function answer(i) {
   $('#next-btn')?.focus({ preventScroll: true });
 }
 
-function next() { idx += 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function next() { if (CAN_SPEAK) window.speechSynthesis.cancel(); idx += 1; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 document.addEventListener('click', e => {
+  const say = e.target.closest('[data-say]');
+  if (say) { speak(say.dataset.say, say); return; }
   const m = e.target.closest('[data-mode]');
   if (m) { mode = m.dataset.mode; viewDate = TODAY; start(); return; }
   const pick = e.target.closest('[data-pick]');
